@@ -20,22 +20,21 @@ class GroundTruthToComprehendFormatConverter:
         self.labeling_job_name = ""
         self.maximum_offset = 0
 
-    def convert_to_dataset(self, index, jsonLine):
-        jsonLineObj = self.parse_manifest_input(jsonLine)
-        if SOURCE not in jsonLineObj:
+    def convert_to_dataset_annotations(self, index, jsonLine):
+        # parse the jsonLine to generate the dataset entry
+        jsonObj = self.parse_manifest_input(jsonLine)
+        if SOURCE not in jsonObj:
             raise Exception(CANNOT_PARSE_AUGMENTED_MANIFEST.substitute(line=index,
                                                                        file_name=self.groundtruth_manifest_file_name))
-        source = jsonLineObj[SOURCE]
+        source = jsonObj[SOURCE]
         if len(source.encode('utf-8')) > MAX_TRAIN_DOC_SIZE:
             raise Exception(DOC_SIZE_EXCEEDED.substitute(file=self.groundtruth_manifest_file_name,
                                                          line=index,
                                                          size=MAX_TRAIN_DOC_SIZE))
         self.maximum_offset = len(source.encode('utf-8'))
-        return jsonLineObj[SOURCE]
 
-    def convert_to_annotations(self, index, jsonLine):
+        # parse the jsonLine to generate the annotations entry
         annotations = []
-        jsonObj = self.parse_manifest_input(jsonLine)
         
         self.labeling_job_name = self.get_labeling_job_name(index, jsonObj)
         number_of_labels = len(jsonObj[self.labeling_job_name][ANNOTATIONS][ENTITIES])
@@ -60,7 +59,7 @@ class GroundTruthToComprehendFormatConverter:
         
         self._check_for_overlapping_annotations(annotations)
            
-        return annotations
+        return source, annotations
 
     def parse_manifest_input(self, jsonLine):
         try:
