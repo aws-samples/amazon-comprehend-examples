@@ -1,7 +1,10 @@
 from groundtruth_to_comprehend_format_converter import GroundTruthToComprehendFormatConverter
 import csv
+import json
 import argparse
 from urllib.parse import urlparse
+
+ANNOTATION_CSV_HEADER = ['File', 'Line', 'Begin Offset', 'End Offset', 'Type']
 
 
 class GroundTruthFormatConversionHandler:
@@ -32,19 +35,20 @@ class GroundTruthFormatConversionHandler:
     def read_write_dataset(self):
         with open('output.manifest', 'r') as groundtruth_output_file, open(self.dataset_filename, 'a', encoding='utf8') as dataset:
             for index, jsonLine in enumerate(groundtruth_output_file):
-                source = self.convert_object.convert_to_dataset(jsonLine)
-                datawriter = csv.writer(dataset)
-                datawriter.writerow([source])
+                source = self.convert_object.convert_to_dataset(index, jsonLine)
+                source = json.dumps(source).strip('"')
+                dataset.write('"' + source + '"')
+                dataset.write("\n")
 
     def read_write_annotations(self):
         # write header
         with open(self.annotation_filename, 'w') as annotation_file:
             datawriter = csv.writer(annotation_file)
-            datawriter.writerow(['File', 'Line', 'Begin Offset', 'End Offset', 'Type'])
+            datawriter.writerow(ANNOTATION_CSV_HEADER)
 
         # write annotations
         with open('output.manifest', 'r') as groundtruth_output_file, open(self.annotation_filename, 'a', encoding='utf8') as annotations:
-            datawriter = csv.writer(annotations)
+            datawriter = csv.writer(annotations, delimiter=',', lineterminator='\n')
             for index, jsonLine in enumerate(groundtruth_output_file):
                 annotations = self.convert_object.convert_to_annotations(index, jsonLine)
                 for entry in annotations:
