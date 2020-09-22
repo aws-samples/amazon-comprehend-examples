@@ -34,7 +34,7 @@ class GroundTruthFormatConversionHandler:
         
         # write header
         with open(self.annotation_filename, 'w', encoding='utf8') as annotation_file:
-            datawriter = csv.writer(annotation_file)
+            datawriter = csv.writer(annotation_file, delimiter=',', lineterminator='\n')
             datawriter.writerow(ANNOTATION_CSV_HEADER)
     
     def read_augmented_manifest_file(self):
@@ -42,7 +42,7 @@ class GroundTruthFormatConversionHandler:
             for index, jsonLine in enumerate(groundtruth_output_file):
                 self.read_write_dataset_annotations(index, jsonLine)
 
-    def read_write_dataset_annotations(self):
+    def read_write_dataset_annotations(self, index, jsonLine):
         with open(self.dataset_filename, 'a', encoding='utf8') as dataset, open(self.annotation_filename, 'a', encoding='utf8') as annotation_file:
             datawriter = csv.writer(annotation_file, delimiter=',', lineterminator='\n')
             source, annotations = self.convert_object.convert_to_dataset_annotations(index, jsonLine)
