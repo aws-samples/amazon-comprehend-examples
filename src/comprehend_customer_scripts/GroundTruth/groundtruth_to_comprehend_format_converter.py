@@ -1,6 +1,6 @@
 import json
 from operator import itemgetter
-from .customer_errors import CANNOT_PARSE_AUGMENTED_MANIFEST, DOC_SIZE_EXCEEDED, WRONG_ANNOTATION, INVALID_END_OFFSET, \
+from customer_errors import CANNOT_PARSE_AUGMENTED_MANIFEST, DOC_SIZE_EXCEEDED, WRONG_ANNOTATION, INVALID_END_OFFSET, \
     INVALID_OFFSETS, OVERLAPPING_ANNOTATIONS
 
 SOURCE = 'source'
@@ -20,7 +20,7 @@ class GroundTruthToComprehendFormatConverter:
         self.labeling_job_name = ""
         self.maximum_offset = 0
 
-    def convert_to_dataset(self, jsonLine):
+    def convert_to_dataset(self, index, jsonLine):
         jsonLineObj = self.parse_manifest_input(jsonLine)
         if SOURCE not in jsonLineObj:
             raise Exception(CANNOT_PARSE_AUGMENTED_MANIFEST.substitute(line=index,
