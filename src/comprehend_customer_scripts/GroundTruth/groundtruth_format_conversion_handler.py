@@ -31,29 +31,30 @@ class GroundTruthFormatConversionHandler:
 
         if dataset_scheme != "s3" or annotation_scheme != "s3" or self.dataset_filename.split(".")[-1] != "csv" or self.annotation_filename.split(".")[-1] != "csv":
             raise Exception("Either of the output S3 location provided is incorrect!")
-
-    def read_write_dataset(self):
-        with open('output.manifest', 'r') as groundtruth_output_file, open(self.dataset_filename, 'a', encoding='utf8') as dataset:
-            for index, jsonLine in enumerate(groundtruth_output_file):
-                source = self.convert_object.convert_to_dataset(index, jsonLine)
-                source = json.dumps(source).strip('"')
-                dataset.write('"' + source + '"')
-                dataset.write("\n")
-
-    def read_write_annotations(self):
+        
         # write header
-        with open(self.annotation_filename, 'w') as annotation_file:
+        with open(self.annotation_filename, 'w', encoding='utf8') as annotation_file:
             datawriter = csv.writer(annotation_file)
             datawriter.writerow(ANNOTATION_CSV_HEADER)
-
-        # write annotations
-        with open('output.manifest', 'r') as groundtruth_output_file, open(self.annotation_filename, 'a', encoding='utf8') as annotations:
-            datawriter = csv.writer(annotations, delimiter=',', lineterminator='\n')
+    
+    def read_augmented_manifest_file(self):
+        with open('output.manifest', 'r', encoding='utf-8') as groundtruth_output_file:
             for index, jsonLine in enumerate(groundtruth_output_file):
-                annotations = self.convert_object.convert_to_annotations(index, jsonLine)
-                for entry in annotations:
-                    datawriter.writerow(entry)
+                self.read_write_dataset_annotations(index, jsonLine)
 
+    def read_write_dataset_annotations(self):
+        with open(self.dataset_filename, 'a', encoding='utf8') as dataset, open(self.annotation_filename, 'a', encoding='utf8') as annotation_file:
+            datawriter = csv.writer(annotation_file, delimiter=',', lineterminator='\n')
+            source, annotations = self.convert_object.convert_to_dataset_annotations(index, jsonLine)
+            # write the document in the dataset file
+            source = json.dumps(source).strip('"')
+            dataset.write('"' + source + '"')
+            dataset.write("\n")
+            
+            # write the annotations of each document in the annotations file
+            for entry in annotations:
+                datawriter.writerow(entry)
+                
 
 def main():
     parser = argparse.ArgumentParser(description="Parsing the output S3Uri")
@@ -62,8 +63,7 @@ def main():
     args = parser.parse_args()
     handler = GroundTruthFormatConversionHandler()
     handler.validate_s3_input(args)
-    handler.read_write_dataset()
-    handler.read_write_annotations()
+    handler.read_augmented_manifest_file()
 
 
 if __name__ == "__main__":
