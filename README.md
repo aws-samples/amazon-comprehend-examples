@@ -9,8 +9,9 @@ This package contains scripts for our customers to experiment the features relea
 2. Install python3
 
 ## Documentation
-To provide our customers a seamless integration between SageMaker GroundTruth and Comprehend's CreateEntityRecognizer API, this package contains a shell script (convertGroundtruthToComprehendERFormat.sh) that converts the output of SageMaker GroundTruth NER labeling job to a format which is compatible with Comprehend's EntityRecognizer API.
+To provide our customers a seamless integration between SageMaker GroundTruth and Comprehend's Custom API's, this package contains the following: 1) a shell script (convertGroundtruthToComprehendERFormat.sh) that converts the output of SageMaker GroundTruth NER labeling job to a format which is compatible with Comprehend's EntityRecognizer API. 2) a shell script (convertGroundtruthToComprehendCLRFormat.sh) that converts the output of SageMaker GroundTruth MultiClass and MultiLabel labeling job to a format which is compatible with Comprehend's DocumentClassifier API.
 
+### EntityRecognizer
 The script takes the following 3 inputs from the customer:
 - S3Uri of the bucket where the output.manifest file (SageMaker Groundtruth labeling job output) is stored
 - S3Uri of the bucket where the customer expects the dataset.csv (Comprehend's CreateEntityRecognizer API input) to be stored
@@ -56,7 +57,7 @@ dataset.csv,0,56,67,Location
 
 Eventually, the shell script will execute the AWS CLI command to upload dataset and annotations file to the S3Uri provided as the input.
 
-###DocumentClassifier:
+### DocumentClassifier:
 The convertGroundtruthToComprehendCLRFormat.sh script takes the following 3 inputs from the customer:
 - Mode of the training job. Valid values are MULTI_CLASS and MULTI_LABEL
 - S3Uri of the bucket where the output.manifest file (SageMaker Groundtruth labeling job output) is stored
@@ -73,7 +74,7 @@ To run the script, execute the following command:
 ./convertGroundtruthToCompCLRFormat.sh <mode> <inputS3Uri> <outputDatasetS3Uri> <label_delimiter>
 ```
 
-####Multi_Class Example:
+#### Multi_Class Example:
 
 output.manifest
 
@@ -87,7 +88,7 @@ dataset.csv:
 joy,Whatever you decide to do make sure it makes you #happy.
 ```
 
-####Multi_Label Example:
+#### Multi_Label Example:
 
 output.manifest
 ```
