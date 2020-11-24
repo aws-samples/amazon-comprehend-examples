@@ -1,0 +1,108 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" type="text/css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+
+<style type="text/css">
+
+        #mynetwork {
+            width: 800;
+            height: 600;
+            background-color: #ffffff;
+            border: 1px solid lightgray;
+            position: relative;
+            float: left;
+        }
+
+        
+
+        
+
+        
+</style>
+
+</head>
+
+<body>
+<div id = "mynetwork"></div>
+
+
+<script type="text/javascript">
+
+    // initialize global variables.
+    var edges;
+    var nodes;
+    var network; 
+    var container;
+    var options, data;
+
+    
+    // This method is responsible for drawing the graph, returns the drawn network
+    function drawGraph() {
+        var container = document.getElementById('mynetwork');
+        
+        
+
+        // parsing and collecting nodes and edges from the python
+        nodes = new vis.DataSet([{"color": "#b4e1a2", "group": "event", "id": "ev0", "label": "CORPORATE_MERGER", "shape": "box", "size": 10, "tag": "CORPORATE_MERGER"}, {"color": "#9e0142", "group": "entity_group", "id": "gr4", "label": "DATE", "shape": "dot", "size": 6, "tag": "DATE"}, {"color": "#fee796", "group": "entity_group", "id": "gr1", "label": "STOCK_CODE", "shape": "dot", "size": 6, "tag": "STOCK_CODE"}, {"color": "#fee796", "group": "entity_group", "id": "gr3", "label": "STOCK_CODE", "shape": "dot", "size": 6, "tag": "STOCK_CODE"}, {"color": "#f57446", "group": "entity_group", "id": "gr2", "label": "ORGANIZATION", "shape": "dot", "size": 6, "tag": "ORGANIZATION"}, {"color": "#9e0142", "group": "entity_group", "id": "gr8", "label": "DATE", "shape": "dot", "size": 6, "tag": "DATE"}, {"color": "#b4e1a2", "group": "trigger", "id": "ev0-tr0", "label": "merger", "shape": "diamond", "size": 4, "tag": "CORPORATE_MERGER"}, {"color": "#b4e1a2", "group": "trigger", "id": "ev0-tr1", "label": "partnership", "shape": "diamond", "size": 4, "tag": "CORPORATE_MERGER"}, {"color": "#ebf7a0", "group": "event", "id": "ev1", "label": "CORPORATE_ACQUISITION", "shape": "box", "size": 10, "tag": "CORPORATE_ACQUISITION"}, {"color": "#e75948", "group": "entity_group", "id": "gr5", "label": "MONETARY_VALUE", "shape": "dot", "size": 6, "tag": "MONETARY_VALUE"}, {"color": "#f57446", "group": "entity_group", "id": "gr0", "label": "ORGANIZATION", "shape": "dot", "size": 6, "tag": "ORGANIZATION"}, {"color": "#ebf7a0", "group": "trigger", "id": "ev1-tr0", "label": "acquire", "shape": "diamond", "size": 4, "tag": "CORPORATE_ACQUISITION"}, {"color": "#ebf7a0", "group": "trigger", "id": "ev1-tr1", "label": "transaction", "shape": "diamond", "size": 4, "tag": "CORPORATE_ACQUISITION"}, {"color": "#f8fcb5", "group": "event", "id": "ev2", "label": "EMPLOYMENT", "shape": "box", "size": 10, "tag": "EMPLOYMENT"}, {"color": "#fa9656", "group": "entity_group", "id": "gr6", "label": "PERSON", "shape": "dot", "size": 6, "tag": "PERSON"}, {"color": "#fdb668", "group": "entity_group", "id": "gr7", "label": "PERSON_TITLE", "shape": "dot", "size": 6, "tag": "PERSON_TITLE"}, {"color": "#f8fcb5", "group": "trigger", "id": "ev2-tr0", "label": "remain", "shape": "diamond", "size": 4, "tag": "EMPLOYMENT"}, {"color": "#f57446", "group": "entity", "id": "gr0-en2", "label": "Amazon", "shape": "square", "size": 4, "tag": "ORGANIZATION"}, {"color": "#fee796", "group": "entity", "id": "gr1-en0", "label": "NASDAQ:AMZN", "shape": "square", "size": 4, "tag": "STOCK_CODE"}, {"color": "#f57446", "group": "entity", "id": "gr2-en0", "label": "Whole Foods Market, Inc.", "shape": "square", "size": 4, "tag": "ORGANIZATION"}, {"color": "#fee796", "group": "entity", "id": "gr3-en0", "label": "NASDAQ:WFM", "shape": "square", "size": 4, "tag": "STOCK_CODE"}, {"color": "#9e0142", "group": "entity", "id": "gr4-en0", "label": "today", "shape": "square", "size": 4, "tag": "DATE"}, {"color": "#e75948", "group": "entity", "id": "gr5-en0", "label": "$42", "shape": "square", "size": 4, "tag": "MONETARY_VALUE"}, {"color": "#e75948", "group": "entity", "id": "gr5-en1", "label": "$13.7 billion", "shape": "square", "size": 4, "tag": "MONETARY_VALUE"}, {"color": "#fa9656", "group": "entity", "id": "gr6-en1", "label": "John Mackey", "shape": "square", "size": 4, "tag": "PERSON"}, {"color": "#fdb668", "group": "entity", "id": "gr7-en1", "label": "CEO", "shape": "square", "size": 4, "tag": "PERSON_TITLE"}, {"color": "#9e0142", "group": "entity", "id": "gr8-en0", "label": "during the second half of 2017", "shape": "square", "size": 4, "tag": "DATE"}]);
+        edges = new vis.DataSet([{"color": "grey", "from": "ev0", "label": "DATE", "to": "gr4", "weight": 99.45779999999999}, {"color": "grey", "from": "ev0", "label": "PARTICIPANT", "to": "gr1", "weight": 99.0119}, {"color": "grey", "from": "ev0", "label": "PARTICIPANT", "to": "gr3", "weight": 98.0082}, {"color": "grey", "from": "ev0", "label": "PARTICIPANT", "to": "gr2", "weight": 99.9654}, {"color": "grey", "from": "ev0", "label": "DATE", "to": "gr8", "weight": 99.9491}, {"color": "grey", "from": "ev0", "label": "", "to": "ev0-tr0", "weight": 100.0}, {"color": "grey", "from": "ev0", "label": "", "to": "ev0-tr1", "weight": 99.9969}, {"color": "grey", "from": "ev1", "label": "AMOUNT", "to": "gr5", "weight": 99.873}, {"color": "grey", "from": "ev1", "label": "DATE", "to": "gr4", "weight": 99.45779999999999}, {"color": "grey", "from": "ev1", "label": "INVESTEE", "to": "gr2", "weight": 99.9668}, {"color": "grey", "from": "ev1", "label": "INVESTOR", "to": "gr0", "weight": 99.9615}, {"color": "grey", "from": "ev1", "label": "", "to": "ev1-tr0", "weight": 100.0}, {"color": "grey", "from": "ev1", "label": "", "to": "ev1-tr1", "weight": 99.9985}, {"color": "grey", "from": "ev2", "label": "EMPLOYEE", "to": "gr6", "weight": 99.9699}, {"color": "grey", "from": "ev2", "label": "EMPLOYEE_TITLE", "to": "gr7", "weight": 99.8065}, {"color": "grey", "from": "ev2", "label": "EMPLOYER", "to": "gr2", "weight": 99.98129999999999}, {"color": "grey", "from": "ev2", "label": "", "to": "ev2-tr0", "weight": 100.0}, {"color": "grey", "from": "gr0", "label": "", "to": "gr0-en2", "weight": 58.46940000000001}, {"color": "grey", "from": "gr1", "label": "", "to": "gr1-en0", "weight": 100.0}, {"color": "grey", "from": "gr2", "label": "", "to": "gr2-en0", "weight": 100.0}, {"color": "grey", "from": "gr3", "label": "", "to": "gr3-en0", "weight": 100.0}, {"color": "grey", "from": "gr4", "label": "", "to": "gr4-en0", "weight": 100.0}, {"color": "grey", "from": "gr5", "label": "", "to": "gr5-en0", "weight": 100.0}, {"color": "grey", "from": "gr5", "label": "", "to": "gr5-en1", "weight": 54.7346}, {"color": "grey", "from": "gr6", "label": "", "to": "gr6-en1", "weight": 97.7111}, {"color": "grey", "from": "gr7", "label": "", "to": "gr7-en1", "weight": 77.8198}, {"color": "grey", "from": "gr8", "label": "", "to": "gr8-en0", "weight": 100.0}]);
+
+        // adding nodes and edges to the graph
+        data = {nodes: nodes, edges: edges};
+
+        var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": false,
+            "type": "continuous"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+        
+        
+
+        
+
+        network = new vis.Network(container, data, options);
+
+        
+
+
+        
+
+        return network;
+
+    }
+
+    drawGraph();
+
+</script>
+</body>
+</html>
