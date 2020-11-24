@@ -11,7 +11,7 @@ This package contains scripts, tutorials, and data for our customers to use when
 2. [amazon_comprehend_events_tutorial](./amazon_comprehend_events_tutorial/README.md): This package contains a Jupyter notebook, supporting script, and sample data necessary to produce tabulations and visualizations of Comprehend Events asynchronous API output.
 
 
-# Resources
+# Amazon Comprehend Solutions and Resources
 Amazon Comprehend Document Search- Using Amazon Comprehend, Amazon Elasticsearch with Kibana, Amazon S3, Amazon Cognito to search over large number of documents such as pdf files.https://github.com/aws-samples/amazon-comprehend-doc-search
 
 Amazon Textract Comprehend Image Search with Elasticsearch https://github.com/aws-samples/amazon-textract-comprehend-OCRimage-search-and-analyze
