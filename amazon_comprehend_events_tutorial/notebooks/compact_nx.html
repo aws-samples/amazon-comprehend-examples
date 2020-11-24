@@ -1,0 +1,108 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" type="text/css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+
+<style type="text/css">
+
+        #mynetwork {
+            width: 800px;
+            height: 600px;
+            background-color: #ffffff;
+            border: 1px solid lightgray;
+            position: relative;
+            float: left;
+        }
+
+        
+
+        
+
+        
+</style>
+
+</head>
+
+<body>
+<div id = "mynetwork"></div>
+
+
+<script type="text/javascript">
+
+    // initialize global variables.
+    var edges;
+    var nodes;
+    var network; 
+    var container;
+    var options, data;
+
+    
+    // This method is responsible for drawing the graph, returns the drawn network
+    function drawGraph() {
+        var container = document.getElementById('mynetwork');
+        
+        
+
+        // parsing and collecting nodes and edges from the python
+        nodes = new vis.DataSet([{"color": "#5160aa", "group": "trigger", "id": "tr0", "label": "CORPORATE_MERGER", "shape": "dot", "size": 9, "tag": "CORPORATE_MERGER"}, {"color": "#5e4fa2", "group": "entity", "id": "en4", "label": "today", "shape": "dot", "size": 9, "tag": "DATE"}, {"color": "#cf374d", "group": "entity", "id": "en1", "label": "NASDAQ:AMZN", "shape": "dot", "size": 9, "tag": "STOCK_CODE"}, {"color": "#cf374d", "group": "entity", "id": "en3", "label": "NASDAQ:WFM", "shape": "dot", "size": 9, "tag": "STOCK_CODE"}, {"color": "#4471b2", "group": "entity", "id": "en2", "label": "Whole Foods Market, Inc.", "shape": "dot", "size": 9, "tag": "ORGANIZATION"}, {"color": "#5e4fa2", "group": "entity", "id": "en8", "label": "during the second half of 2017", "shape": "dot", "size": 9, "tag": "DATE"}, {"color": "#fcaa5f", "group": "trigger", "id": "tr1", "label": "CORPORATE_ACQUISITION", "shape": "dot", "size": 9, "tag": "CORPORATE_ACQUISITION"}, {"color": "#fdba6b", "group": "entity", "id": "en5", "label": "$13.7 billion", "shape": "dot", "size": 9, "tag": "MONETARY_VALUE"}, {"color": "#4471b2", "group": "entity", "id": "en0", "label": "Amazon", "shape": "dot", "size": 9, "tag": "ORGANIZATION"}, {"color": "#6ac4a5", "group": "trigger", "id": "tr2", "label": "EMPLOYMENT", "shape": "dot", "size": 9, "tag": "EMPLOYMENT"}, {"color": "#7ecca5", "group": "entity", "id": "en6", "label": "John Mackey", "shape": "dot", "size": 9, "tag": "PERSON"}, {"color": "#5ab4ab", "group": "entity", "id": "en7", "label": "CEO", "shape": "dot", "size": 9, "tag": "PERSON_TITLE"}]);
+        edges = new vis.DataSet([{"color": "grey", "from": "tr0", "label": "DATE", "to": "en4", "weight": 99.45779999999999}, {"color": "grey", "from": "tr0", "label": "PARTICIPANT", "to": "en1", "weight": 99.0119}, {"color": "grey", "from": "tr0", "label": "PARTICIPANT", "to": "en3", "weight": 98.0082}, {"color": "grey", "from": "tr0", "label": "PARTICIPANT", "to": "en2", "weight": 99.9654}, {"color": "grey", "from": "tr0", "label": "DATE", "to": "en8", "weight": 99.9491}, {"color": "grey", "from": "tr1", "label": "AMOUNT", "to": "en5", "weight": 99.873}, {"color": "grey", "from": "tr1", "label": "DATE", "to": "en4", "weight": 99.45779999999999}, {"color": "grey", "from": "tr1", "label": "INVESTEE", "to": "en2", "weight": 99.9668}, {"color": "grey", "from": "tr1", "label": "INVESTOR", "to": "en0", "weight": 99.9615}, {"color": "grey", "from": "tr2", "label": "EMPLOYEE", "to": "en6", "weight": 99.9699}, {"color": "grey", "from": "tr2", "label": "EMPLOYEE_TITLE", "to": "en7", "weight": 99.8065}, {"color": "grey", "from": "tr2", "label": "EMPLOYER", "to": "en2", "weight": 99.98129999999999}]);
+
+        // adding nodes and edges to the graph
+        data = {nodes: nodes, edges: edges};
+
+        var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": false,
+            "type": "continuous"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+        
+        
+
+        
+
+        network = new vis.Network(container, data, options);
+
+        
+
+
+        
+
+        return network;
+
+    }
+
+    drawGraph();
+
+</script>
+</body>
+</html>
