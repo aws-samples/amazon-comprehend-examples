@@ -32,7 +32,7 @@ nlp-analysis-demo - The purpose of this demo is to build a stack that uses Amazo
 
 
 # Workshops
-Workshop demonstrating the use of Amazon Comprehend Medical to extract clinical entities from unstructured text and map them to FHIR resources https://github.com/aws-samples/amazon-comprehend-doc-search
+
 workshop-textract-comprehend-es https://github.com/aws-samples/workshop-textract-comprehend-es
 
 
