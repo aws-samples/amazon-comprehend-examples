@@ -107,7 +107,7 @@ The script will executes the AWS CLI command to download the file to the local.
 
 It will parse output.manifest file and generate dataset.csv file based on the file names obtained from parsing the outputS3Uri.
 
-# Resources
+# Amazon Comprehend Solutions and Resources
 Amazon Comprehend Document Search- Using Amazon Comprehend, Amazon Elasticsearch with Kibana, Amazon S3, Amazon Cognito to search over large number of documents such as pdf files.https://github.com/aws-samples/amazon-comprehend-doc-search
 
 Amazon Textract Comprehend Image Search with Elasticsearch https://github.com/aws-samples/amazon-textract-comprehend-OCRimage-search-and-analyze
