@@ -6,9 +6,9 @@ This package contains scripts, tutorials, and data for our customers to use when
 
 ## Packages
 
-1. [comprehend-groundtruth-integration](./comprehend-groundtruth-integration): This package contains shell scripts for conversion of SageMaker GroundTruth NER and MultiClass/MultiLabel labeling job output to formats suitable for use with Comprehend's Custom NER and Custom Document Classifier APIs.
+1. [comprehend_groundtruth_integration](./comprehend_groundtruth_integration/README.md): This package contains shell scripts for conversion of SageMaker GroundTruth NER and MultiClass/MultiLabel labeling job output to formats suitable for use with Comprehend's Custom NER and Custom Document Classifier APIs.
 
-2. [amazon-comprehend-events-tutorial](./amazon-comprehend-events-tutorial): This package contains a Jupyter notebook, supporting script, and sample data necessary to produce tabulations and visualizations of Comprehend Events asynchronous API output.
+2. [amazon_comprehend_events_tutorial](./amazon_comprehend_events_tutorial/README.md): This package contains a Jupyter notebook, supporting script, and sample data necessary to produce tabulations and visualizations of Comprehend Events asynchronous API output.
 
 
 # LICENSE
