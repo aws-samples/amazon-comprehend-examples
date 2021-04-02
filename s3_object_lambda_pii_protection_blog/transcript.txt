@@ -1,0 +1,33 @@
+*Call center Agent :*
+
+Thank you for calling customer support. I am Zhang Wei. How can I assist you today ? 
+
+*Customer :*
+
+Hello Zhang Wei. My name is Victor Baze. My credit card number 1111-0000-1111-0000 has a minimum payment of $24.53 that is due by July 31st. Based on my autopay settings, that amount should have withdrawn on the due date from my bank account XXXXXX1111 with the routing number XXXXX0000. But that hasn’t happened and now I might have to pay a late fee, this is frustrating
+
+*Customer Agent :*
+
+Can you please confirm your mailing address and email ?
+
+*Customer :*
+
+victor@xyz.com (mailto:xyz@xyz.com) and 100 Main Street, Anytown, WA 98121
+
+*Customer Agent :*
+
+Could your tell me the last four digits of your social security number ?
+
+*Customer :*
+
+8920
+
+*Customer Agent :*
+
+Thank you. I have verified your information and I find that there was error in processing your payment from your Bank and I have gone ahead and corrected problem. Rest assured, you won’t be charged the late fee. 
+
+Also you will receive a confirmation of the payment as text message on your phone number. The number that I have on file is 206-555-0100 (tel:2065550100). Is that the correct number and did you receive the payment confirmation message ?
+
+*Customer :*
+
+Yes I received the confirmation and its the right phone number
