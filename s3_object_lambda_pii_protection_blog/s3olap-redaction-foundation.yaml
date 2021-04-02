@@ -1,0 +1,385 @@
+# (c) 2021 Amazon Web Services, Inc. or its affiliates. All Rights Reserved. 
+# This AWS Content is provided subject to the terms of the AWS Customer 
+# Agreement available at https://aws.amazon.com/agreement or other written 
+# agreement between Customer and Amazon Web Services, Inc. 
+
+AWSTemplateFormatVersion: "2010-09-09" 
+Description: This template creates the foundation necessary to deploy the S3 Object Lambda Redaction Use Case. Deploy this after provisioning the AWS Serverless Application Repository Comprehend Lambda Function
+
+Parameters:
+  # Standard Access Point Parameters
+
+  pAdminAccessPointName: 
+    Type: String  
+    Description: Admin Standard Access Point Name.
+    Default: admin-s3-access-point-call-transcripts-known-pii
+
+  pBillingAccessPointName: 
+    Type: String  
+    Description: Billing Standard Access Point Name.
+    Default: billing-s3-access-point-call-transcripts-known-pii
+
+  pCustomerSupportAccessPointName: 
+    Type: String  
+    Description: Customer Support Access Point Name.
+    Default: cs-s3-access-point-call-transcripts-known-pii
+
+# Role Parameter Access Points
+
+  pAdminRoleName: 
+    Type: String  
+    Description: Admin S3 Access Point Role Name.
+    Default: RedactionAdminRole
+
+  pBillingRoleName: 
+    Type: String  
+    Description: S3 Access Point Role Name.
+    Default: RedactionBillingRole
+
+  pCustomerSupportRoleName: 
+    Type: String  
+    Description: S3 Access Point Role Name.
+    Default: RedactionCustSupportRole
+
+# User Supplied Postfix for Uniqueness
+
+  pPostfix: 
+    Type: String  
+    Description: Supply a Postfix to make resources recognizable and unique (ideally 6 characters or fewer)
+
+# S3 Bucket for hosting the transcript text file
+Resources:
+  transcriptBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: TRUE
+        BlockPublicPolicy: TRUE
+        IgnorePublicAcls: TRUE
+        RestrictPublicBuckets: TRUE
+
+      BucketName: 
+        !Join
+          - ''
+          - - 'call-transcripts-known-pii-'
+            - !Ref pPostfix
+
+# S3 Bucket Policy for S3 Bucket only allowing put access, and get object access only through AccessPoints              
+  transcriptBucketPolicy:
+    DependsOn: 
+    - transcriptBucket
+    - rAdminRole
+    - rBillingRole
+    - rCustomerSupportRole
+    - rAdminAccessPoint
+    - rBillingAccessPoint
+    - rCustomerSupportAccessPoint
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: 
+        Ref: "transcriptBucket"
+      PolicyDocument: 
+        Statement: 
+          - Sid: AWSBucketGetPolicy
+            Action: 's3:GetObject'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref 'transcriptBucket'
+                - /*
+            Principal: 
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Condition: 
+              StringEquals:
+                's3:DataAccessPointAccount': !Ref 'AWS::AccountId'  
+          - Sid: AWSBucketPutPolicy
+            Action: 's3:PutObject'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref 'transcriptBucket'
+                - /*
+            Principal: 
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+
+# Access Points per Role
+
+  rAdminAccessPoint: 
+    DependsOn: 
+    - transcriptBucket 
+    - rAdminRole
+    Type: AWS::S3::AccessPoint
+    Properties: 
+      Bucket: !Ref transcriptBucket
+      Name: !Ref pAdminAccessPointName
+      NetworkOrigin: Internet
+
+  rBillingAccessPoint: 
+    DependsOn: 
+    - transcriptBucket 
+    - rBillingRole
+    Type: AWS::S3::AccessPoint
+    Properties: 
+      Bucket: !Ref transcriptBucket
+      Name: !Ref pBillingAccessPointName
+      NetworkOrigin: Internet
+
+  rCustomerSupportAccessPoint: 
+    DependsOn: 
+    - transcriptBucket 
+    - rCustomerSupportRole
+    Type: AWS::S3::AccessPoint
+    Properties: 
+      Bucket: !Ref transcriptBucket
+      Name: !Ref pCustomerSupportAccessPointName
+      NetworkOrigin: Internet
+
+# IAM Roles per Persona
+
+  rAdminRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref pAdminRoleName 
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                  Fn::Join: 
+                  - ""
+                  - 
+                      - "arn:aws:iam::"
+                      - 
+                        !Ref AWS::AccountId
+                      - ":root"
+                
+            Action:
+              - 'sts:AssumeRole'
+
+
+  rBillingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref pBillingRoleName 
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                  Fn::Join: 
+                  - ""
+                  - 
+                      - "arn:aws:iam::"
+                      - 
+                        !Ref AWS::AccountId
+                      - ":root"
+                
+            Action:
+              - 'sts:AssumeRole'
+
+
+  rCustomerSupportRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref pCustomerSupportRoleName 
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                  Fn::Join: 
+                  - ""
+                  - 
+                      - "arn:aws:iam::"
+                      - 
+                        !Ref AWS::AccountId
+                      - ":root"
+                
+            Action:
+              - 'sts:AssumeRole'
+
+## IAM Policy Documents for the roles
+
+  rAdminRolePolicy:
+      DependsOn: 
+      - rAdminRole
+      Type: AWS::IAM::Policy
+      Properties: 
+        PolicyName: 'admin-role-s3olap-policy'
+        PolicyDocument: 
+          Version: '2012-10-17'
+          #
+          Statement:
+          - Sid: AllowListingObjects
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: "*"
+          - Sid: AllowListingBucketsAndAccessPoints
+            Effect: Allow
+            Action:
+            - s3:GetAccessPointForObjectLambda
+            - s3:GetAccessPointConfigurationForObjectLambda
+            - s3:ListAccessPointsForObjectLambda
+            - s3:ListAllMyBuckets
+            - s3:ListAccessPoints
+            - s3:GetAccessPoint
+            - s3:GetAccountPublicAccessBlock
+            - s3:GetBucketPublicAccessBlock
+            - s3:GetBucketPolicyStatus
+            - s3:GetBucketAcl
+            - s3:GetAccessPointPolicyStatus
+            Resource: "*"
+          - Sid: AllowObjectLambdaAccess
+            Action:
+            - s3-object-lambda:Get*
+            - s3-object-lambda:List*
+            Effect: Allow
+            Resource:
+              !Sub 'arn:aws:s3-object-lambda:${AWS::Region}:${AWS::AccountId}:accesspoint/admin-s3olap-call-transcripts-known-pii'
+
+          - Sid: AllowStandardAccessPointAccess
+            Action:
+            - s3:Get*
+            - s3:List*
+            Effect: Allow
+            Resource: "*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:CalledVia:
+                - s3-object-lambda.amazonaws.com
+          - Sid: AllowLambdaInvocation
+            Action:
+            - lambda:InvokeFunction
+            Effect: Allow
+            Resource: "*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:CalledVia:
+                - s3-object-lambda.amazonaws.com
+        Roles: 
+        - 
+          !Ref pAdminRoleName
+
+  rBillingRolePolicy:
+      DependsOn: 
+      - rBillingRole
+      Type: AWS::IAM::Policy
+      Properties: 
+        PolicyName: 'billing-role-s3olap-policy'
+        PolicyDocument: 
+          Version: '2012-10-17'
+          Statement:
+          - Sid: AllowListingObjects
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: "*"
+          - Sid: AllowListingBucketsAndAccessPoints
+            Effect: Allow
+            Action:
+            - s3:GetAccessPointForObjectLambda
+            - s3:GetAccessPointConfigurationForObjectLambda
+            - s3:ListAccessPointsForObjectLambda
+            - s3:ListAllMyBuckets
+            - s3:ListAccessPoints
+            - s3:GetAccessPoint
+            - s3:GetAccountPublicAccessBlock
+            - s3:GetBucketPublicAccessBlock
+            - s3:GetBucketPolicyStatus
+            - s3:GetBucketAcl
+            - s3:GetAccessPointPolicyStatus
+            Resource: "*"
+          - Sid: AllowObjectLambdaAccess
+            Action:
+            - s3-object-lambda:Get*
+            - s3-object-lambda:List*
+            Effect: Allow
+            Resource:
+              !Sub 'arn:aws:s3-object-lambda:${AWS::Region}:${AWS::AccountId}:accesspoint/billing-s3olap-call-transcripts-known-pii'
+
+          - Sid: AllowStandardAccessPointAccess
+            Action:
+            - s3:Get*
+            - s3:List*
+            Effect: Allow
+            Resource: "*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:CalledVia:
+                - s3-object-lambda.amazonaws.com
+          - Sid: AllowLambdaInvocation
+            Action:
+            - lambda:InvokeFunction
+            Effect: Allow
+            Resource: "*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:CalledVia:
+                - s3-object-lambda.amazonaws.com
+        Roles: 
+        - 
+          !Ref pBillingRoleName
+
+
+  rCustomerSupportRolePolicy:
+      DependsOn: 
+      - rCustomerSupportRole
+      Type: AWS::IAM::Policy
+      Properties: 
+        PolicyName: 'customersupport-role-s3olap-policy'
+        PolicyDocument: 
+          Version: '2012-10-17'
+          Statement:
+          - Sid: AllowListingObjects
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: "*"
+          - Sid: AllowListingBucketsAndAccessPoints
+            Effect: Allow
+            Action:
+            - s3:GetAccessPointForObjectLambda
+            - s3:GetAccessPointConfigurationForObjectLambda
+            - s3:ListAccessPointsForObjectLambda
+            - s3:ListAllMyBuckets
+            - s3:ListAccessPoints
+            - s3:GetAccessPoint
+            - s3:GetAccountPublicAccessBlock
+            - s3:GetBucketPublicAccessBlock
+            - s3:GetBucketPolicyStatus
+            - s3:GetBucketAcl
+            - s3:GetAccessPointPolicyStatus
+            Resource: "*"
+          - Sid: AllowObjectLambdaAccess
+            Action:
+            - s3-object-lambda:Get*
+            - s3-object-lambda:List*
+            Effect: Allow
+            Resource:
+              !Sub 'arn:aws:s3-object-lambda:${AWS::Region}:${AWS::AccountId}:accesspoint/custsupport-s3olap-call-transcripts-known-pii'
+
+          - Sid: AllowStandardAccessPointAccess
+            Action:
+            - s3:Get*
+            - s3:List*
+            Effect: Allow
+            Resource: "*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:CalledVia:
+                - s3-object-lambda.amazonaws.com
+          - Sid: AllowLambdaInvocation
+            Action:
+            - lambda:InvokeFunction
+            Effect: Allow
+            Resource: "*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:CalledVia:
+                - s3-object-lambda.amazonaws.com
+        Roles: 
+        - 
+          !Ref pCustomerSupportRoleName

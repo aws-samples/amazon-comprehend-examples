@@ -1,0 +1,171 @@
+AWSTemplateFormatVersion: "2010-09-09" 
+Description: This template creates the foundation necessary to deploy the S3 Object Lambda Access Control Use Case. Deploy this after provisioning the AWS Serverless Application Repository Comprehend Lambda Functions
+
+Parameters:
+# Standard Access Point Parameters
+
+  pAccessControlAccessPointName: 
+      Type: String  
+      Description: Access Control Standard Access Point Name.
+      Default: accessctl-s3-ap-survey-results-unknown-pii
+
+# Role Naming Parameter for Access Points
+
+  pGeneralRoleName: 
+    Type: String  
+    Description: Privileged IAM Role Name for use with S3 Access Control Access Point.
+    Default: GeneralRole
+
+# User Supplied Postfix for Uniqueness
+
+  pPostfix: 
+      Type: String  
+      Description: Supply a Postfix to make resources recognizable and unique (ideally 6 characters or fewer)
+
+# S3 Bucket for hosting the survey-results text file
+Resources:
+  surveyResultsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: TRUE
+        BlockPublicPolicy: TRUE
+        IgnorePublicAcls: TRUE
+        RestrictPublicBuckets: TRUE
+
+      BucketName: 
+        !Join
+          - ''
+          - - 'survey-results-unknown-pii-'
+            - !Ref pPostfix
+
+# S3 Bucket Policy for S3 Bucket only allowing put access, and get object access only through AccessPoints              
+  surveyResultsBucketPolicy:
+    DependsOn: 
+      - surveyResultsBucket
+      - rGeneralRole
+      - rAccessControlAccessPoint
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: 
+        Ref: "surveyResultsBucket"
+      PolicyDocument: 
+        Statement: 
+          - Sid: AWSBucketGetPolicy
+            Action: 's3:GetObject'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref 'surveyResultsBucket'
+                - /*
+            Principal: 
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Condition: 
+              StringEquals:
+                's3:DataAccessPointAccount': !Ref 'AWS::AccountId'  
+          - Sid: AWSBucketPutPolicy
+            Action: 's3:PutObject'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref 'surveyResultsBucket'
+                - /*
+            Principal: 
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+
+
+# Access Control Access Point and Policy
+  rAccessControlAccessPoint: 
+      DependsOn: 
+      - surveyResultsBucket 
+      - rGeneralRole
+      Type: AWS::S3::AccessPoint
+      Properties: 
+        Bucket: !Ref surveyResultsBucket
+        Name: !Ref pAccessControlAccessPointName
+        NetworkOrigin: Internet
+
+# IAM Role
+  rGeneralRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref pGeneralRoleName 
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS:
+                Fn::Join: 
+                - ""
+                - 
+                    - "arn:aws:iam::"
+                    - 
+                      !Ref AWS::AccountId
+                    - ":root"
+              
+          Action:
+            - 'sts:AssumeRole'
+
+
+## IAM Policy Doc
+  rGeneralRolePolicy:
+      DependsOn: 
+      - rGeneralRole
+      Type: AWS::IAM::Policy
+      Properties: 
+        PolicyName: 'general-role-s3olap-policy'
+        PolicyDocument: 
+          Version: '2012-10-17'
+          Statement:
+          - Sid: AllowListingObjects
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: "*"
+          - Sid: AllowListingBucketsAndAccessPoints
+            Effect: Allow
+            Action:
+            - s3:GetAccessPointForObjectLambda
+            - s3:GetAccessPointConfigurationForObjectLambda
+            - s3:ListAccessPointsForObjectLambda
+            - s3:ListAllMyBuckets
+            - s3:ListAccessPoints
+            - s3:GetAccessPoint
+            - s3:GetAccountPublicAccessBlock
+            - s3:GetBucketPublicAccessBlock
+            - s3:GetBucketPolicyStatus
+            - s3:GetBucketAcl
+            - s3:GetAccessPointPolicyStatus
+            Resource: "*"
+          - Sid: AllowObjectLambdaAccess
+            Action:
+            - s3-object-lambda:Get*
+            - s3-object-lambda:List*
+            Effect: Allow
+            Resource:
+              !Sub 'arn:aws:s3-object-lambda:${AWS::Region}:${AWS::AccountId}:accesspoint/accessctl-s3olap-survey-results-unknown-pii'
+          
+          - Sid: AllowStandardAccessPointAccess
+            Action:
+            - s3:Get*
+            - s3:List*
+            Effect: Allow
+            Resource: "*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:CalledVia:
+                - s3-object-lambda.amazonaws.com
+          - Sid: AllowLambdaInvocation
+            Action:
+            - lambda:InvokeFunction
+            Effect: Allow
+            Resource: "*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:CalledVia:
+                - s3-object-lambda.amazonaws.com
+        Roles: 
+        - 
+          !Ref pGeneralRoleName
